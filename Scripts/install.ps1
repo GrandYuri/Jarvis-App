@@ -7,33 +7,17 @@ Write-Host "          JARVIS APP CONFIG              " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. OKREŚLENIE ŚCIEŻEK - ZABEZPIECZENIE PRZED ZIPEM
-# Pobieramy miejsce, skąd uruchomiono instalator (np. rozpakowany ZIP)
-$SourceScriptsPath = $PSScriptRoot
-$SourceProjectRoot = Split-Path $SourceScriptsPath -Parent
-
-# Definiujemy STAŁĄ i bezpieczną ścieżkę instalacji w profilu użytkownika Windows
-$InstallRoot = Join-Path $env:LOCALAPPDATA "JarvisDashboard"
-$ScriptsPath = Join-Path $InstallRoot "Scripts"
-$VenvPath = Join-Path $InstallRoot ".venv"
-$RequirementsPath = Join-Path $InstallRoot "requirements.txt"
-
-Write-Host "[INFO] Installing application to a secure location..." -ForegroundColor Yellow
-Write-Host "Target path: $InstallRoot" -ForegroundColor Gray
-
-# Kopiowanie plików do bezpiecznej lokalizacji (jeśli instalujemy z nowego miejsca)
-if ($SourceProjectRoot -ne $InstallRoot) {
-    if (-not (Test-Path $InstallRoot)) {
-        New-Item -ItemType Directory -Path $InstallRoot -Force | Out-Null
-    }
-    # Kopiujemy pliki źródłowe, omijając foldery wirtualne jeśli istniały
-    Copy-Item -Path "$SourceProjectRoot\*" -Destination $InstallRoot -Recurforce -Exclude ".venv" -ErrorAction SilentlyContinue
-    Write-Host "[OK] Files copied successfully to secure installation directory." -ForegroundColor Green
-}
+# --- DYNAMICZNE ŚCIEŻKI (Zawsze oparte o miejsce uruchomienia skryptu) ---
+$ScriptsPath = $PSScriptRoot                      # To jest folder "Scripts", gdzie leży ten skrypt
+$ProjectRoot = Split-Path $ScriptsPath -Parent    # To jest folder główny (np. "Jarvis-App-main")
+$VenvPath = Join-Path $ProjectRoot ".venv"
+$RequirementsPath = Join-Path $ProjectRoot "requirements.txt"
+$JarvisScript = Join-Path $ScriptsPath "jarvis.py"
+# -------------------------------------------------------------------------
 
 $keySaved = $false
 
-# 2. Sprawdzenie czy klucz już istnieje w profilu użytkownika Windows
+# 1. Sprawdzenie czy klucz już istnieje w profilu użytkownika Windows
 $existingKey = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY", "User")
 
 if (-not [string]::IsNullOrWhiteSpace($existingKey)) {
@@ -67,14 +51,14 @@ if (-not [string]::IsNullOrWhiteSpace($existingKey)) {
     }
 }
 
-# 3. SEKCJA AUTOMATYZACJI ŚRODOWISKA PYTHONA (w bezpiecznej lokalizacji)
+# 2. SEKCJA AUTOMATYZACJI ŚRODOWISKA PYTHONA
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "       PYTHON VIRTUAL ENVIRONMENT        " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 
 if (-not (Test-Path $VenvPath)) {
-    Write-Host "[INFO] Creating virtual environment (.venv) in secure directory..." -ForegroundColor Yellow
+    Write-Host "[INFO] Creating virtual environment (.venv)..." -ForegroundColor Yellow
     Start-Process python -ArgumentList "-m venv `"$VenvPath`"" -Wait -NoNewWindow
     Write-Host "[OK] Virtual environment created!" -ForegroundColor Green
 } else {
@@ -91,7 +75,7 @@ if (Test-Path $RequirementsPath) {
     Write-Warning "[WARN] requirements.txt not found!"
 }
 
-# 4. SEKCJA TWORZENIA SKRÓTU (odnosi się WYŁĄCZNIE do bezpiecznego folderu)
+# 3. SEKCJA TWORZENIA SKRÓTU
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "          CREATING DESKTOP SHORTCUT      " -ForegroundColor Cyan
@@ -101,12 +85,11 @@ $DesktopPath = [Environment]::GetFolderPath("Desktop")
 $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
 $IconPath = Join-Path $ScriptsPath "icon.ico"
 $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-$JarvisScript = Join-Path $ScriptsPath "jarvis.py"
 
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
-# Skrót uruchamia Pythona i skrypt bezpośrednio z oficjalnego folderu instalacyjnego AppData
+# Skrót odpala bezpośrednio Pythona z wygenerowanego folderu .venv użytkownika
 $Shortcut.TargetPath = $VenvPython
 $Shortcut.Arguments = "`"$JarvisScript`""
 $Shortcut.WorkingDirectory = $ScriptsPath
