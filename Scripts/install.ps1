@@ -1,62 +1,33 @@
-# Wymuszenie kodowania UTF-8
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
-Clear-Host
+# --- SEKCJA AUTOMATYZACJI ŚRODOWISKA PYTHONA ---
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host "          JARVIS APP CONFIG              " -ForegroundColor Cyan
+Write-Host "       PYTHON VIRTUAL ENVIRONMENT        " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host ""
 
-$keySaved = $false
+# Przejście do głównego katalogu projektu (zakładamy, że skrypt jest w folderze Scripts, więc główny to folder wyżej)
+$ProjectRoot = Split-Path $ScriptsPath -Parent
+$VenvPath = Join-Path $ProjectRoot ".venv"
+$RequirementsPath = Join-Path $ProjectRoot "requirements.txt"
 
-# Pętla sprawdzania i wprowadzania klucza API
-while ($true) {
-    $rawKey = Read-Host "--Here you can paste your openai api key"
-    $apiKey = $rawKey.Trim()
-
-    if (-not [string]::IsNullOrWhiteSpace($apiKey) -and $apiKey.StartsWith("sk-")) {
-        [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $apiKey, "User")
-        Write-Host "[OK] OpenAI Key is now saved!" -ForegroundColor Green
-        $keySaved = $true
-        break
-    } else {
-        Write-Host "[ERROR] Invalid API key format! The key must start with 'sk-' and cannot be empty." -ForegroundColor Red
-        
-        $retryChoice = ""
-        while ($retryChoice -ne "y" -and $retryChoice -ne "n") {
-            $retryChoice = (Read-Host "Do you want to try entering the key again? (y/n)").Trim().ToLower()
-        }
-
-        if ($retryChoice -eq "n") {
-            Write-Host "[INFO] Skipping API key setup. Continuing shortcut creation..." -ForegroundColor Yellow
-            break
-        }
-        
-        Write-Host ""
-    }
+# 1. Tworzenie środowiska wirtualnego, jeśli nie istnieje
+if (-not (Test-Path $VenvPath)) {
+    Write-Host "[INFO] Creating virtual environment (.venv)..." -ForegroundColor Yellow
+    # Szukamy globalnego Pythona, aby utworzyć środowisko
+    Start-Process python -ArgumentList "-m venv `"$VenvPath`"" -Wait -NoNewWindow
+    Write-Host "[OK] Virtual environment created!" -ForegroundColor Green
+} else {
+    Write-Host "[OK] Virtual environment (.venv) already exists." -ForegroundColor Green
 }
 
-# Ścieżki dynamiczne (skrypt jest w folderze Scripts)
-$ScriptsPath = $PSScriptRoot
-$DesktopPath = [Environment]::GetFolderPath("Desktop")
-$ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
-$IconPath = Join-Path $ScriptsPath "icon.ico"
-
-# Tworzenie skrótu na Pulpicie (wskazującym na folder Scripts jako roboczy)
-$WscriptShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
-
-$Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Shortcut.Arguments = "-WindowStyle Hidden -Command ""& {Set-Location '$ScriptsPath'; Start-Process python -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
-$Shortcut.WorkingDirectory = $ScriptsPath
-$Shortcut.Description = "Jarvis App Dashboard"
-
-if (Test-Path $IconPath) {
-    $Shortcut.IconLocation = "$IconPath, 0"
+# 2. Instalacja zależności z requirements.txt
+if (Test-Path $RequirementsPath) {
+    Write-Host "[INFO] Installing dependencies from requirements.txt..." -ForegroundColor Yellow
+    $PipPath = Join-Path $VenvPath "Scripts\pip.exe"
+    
+    # Uruchomienie instalacji pakietów i czekanie na zakończenie procesu
+    Start-Process $PipPath -ArgumentList "install -r `"$RequirementsPath`"" -Wait -NoNewWindow
+    Write-Host "[OK] All dependencies installed successfully!" -ForegroundColor Green
+} else {
+    Write-Warning "[WARN] requirements.txt not found! Skipping package installation."
 }
-
-$Shortcut.Save()
-Write-Host "[OK] Shortcut 'Jarvis App' was created on Desktop!" -ForegroundColor Green
 Write-Host ""
-Write-Host "Everything ready! Powershell closes in 3 seconds..." -ForegroundColor Yellow
-Start-Sleep -Seconds 3
+# ------------------------------------------------
