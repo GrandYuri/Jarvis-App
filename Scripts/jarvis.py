@@ -22,6 +22,12 @@ from PySide6.QtWidgets import (
     QTableView, QTextEdit, QInputDialog, QSizePolicy, QTextBrowser
 )
 
+# Wymuszenie dodania folderu ze skryptami do ścieżki wyszukiwania Pythona
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+
 EVENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jarvis_events.json")
 SETTINGS_FILE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -239,7 +245,9 @@ class AIWorker(QThread):
 
     def run(self):
         try:
-            from Scripts.jarvis_ai import ask_jarvis
+            # Import bezpośredni, ponieważ jarvis.py i jarvis_ai.py są w tym samym katalogu
+            import jarvis_ai
+            ask_jarvis = jarvis_ai.ask_jarvis
 
             answer = ask_jarvis(
                 self.message,
