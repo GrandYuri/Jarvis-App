@@ -86,11 +86,16 @@ $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
 $IconPath = Join-Path $ScriptsPath "icon.ico"
 $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
 
+# Definiujemy pełną ścieżkę absolutną do pliku jarvis.py
+$JarvisScript = Join-Path $ScriptsPath "jarvis.py"
+
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
 $Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""& {Set-Location '$ScriptsPath'; Start-Process '$VenvPython' -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
+# Przekazujemy pełną ścieżkę do Pythona oraz pełną ścieżkę do skryptu jarvis.py
+$Shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""& {Start-Process '$VenvPython' -ArgumentList '`"$JarvisScript`"' -WindowStyle Hidden}"""
+$Shortcut.WorkingDirectory = $ScriptsPath
 $Shortcut.Description = "Jarvis App Dashboard"
 
 if (Test-Path $IconPath) {
