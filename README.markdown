@@ -100,7 +100,7 @@ Jarvis-App/
 ├── setup.bat          # Main one-click launcher
 ├── jarvis.py          # Core application logic
 ├── icon.ico           # Application icon
-├── README.html        # Documentation
+├── README.markdown        # Documentation
 └── Scripts/
     └── install.ps1    # PowerShell configuration script
     </pre>
