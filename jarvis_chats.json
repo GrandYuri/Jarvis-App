@@ -1,0 +1,21 @@
+{
+    "chats": [
+        {
+            "id": "6571a5f8ccbc45a28975e91e87cafc1d",
+            "title": "hi",
+            "created_at": "2026-10-19T18:28:49",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "What is your purpose?",
+                    "timestamp": "2026-10-26T18:58:40"
+                },
+                {
+                    "role": "assistant",
+                    "content": "I just can type lmao",
+                    "timestamp": "2026-10-26T18:59:01"
+                }
+            ]
+        }
+    ]
+}
