@@ -90,8 +90,7 @@ $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
 $Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Shortcut.Arguments = "-WindowStyle Hidden -Command ""& {Set-Location '$ScriptsPath'; Start-Process '$VenvPython' -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
-$Shortcut.WorkingDirectory = $ScriptsPath
+$Shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""& {Set-Location '$ScriptsPath'; Start-Process '$VenvPython' -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
 $Shortcut.Description = "Jarvis App Dashboard"
 
 if (Test-Path $IconPath) {
