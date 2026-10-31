@@ -239,7 +239,7 @@ class AIWorker(QThread):
 
     def run(self):
         try:
-            from jarvis_ai import ask_jarvis
+            from Scripts.jarvis_ai import ask_jarvis
 
             answer = ask_jarvis(
                 self.message,

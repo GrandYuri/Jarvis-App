@@ -14,7 +14,6 @@ while ($true) {
     $rawKey = Read-Host "--Here you can paste your openai api key"
     $apiKey = $rawKey.Trim()
 
-    # Sprawdzenie warunków poprawności klucza (niepusty i zaczynający się od sk-)
     if (-not [string]::IsNullOrWhiteSpace($apiKey) -and $apiKey.StartsWith("sk-")) {
         [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $apiKey, "User")
         Write-Host "[OK] OpenAI Key is now saved!" -ForegroundColor Green
@@ -23,7 +22,6 @@ while ($true) {
     } else {
         Write-Host "[ERROR] Invalid API key format! The key must start with 'sk-' and cannot be empty." -ForegroundColor Red
         
-        # Pętla z pytaniem y/n
         $retryChoice = ""
         while ($retryChoice -ne "y" -and $retryChoice -ne "n") {
             $retryChoice = (Read-Host "Do you want to try entering the key again? (y/n)").Trim().ToLower()
@@ -38,19 +36,19 @@ while ($true) {
     }
 }
 
-# Dynamiczne pobranie ścieżki folderu projektu
-$ProjectPath = $PSScriptRoot
+# Ścieżki dynamiczne (skrypt jest w folderze Scripts)
+$ScriptsPath = $PSScriptRoot
 $DesktopPath = [Environment]::GetFolderPath("Desktop")
 $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
-$IconPath = Join-Path $ProjectPath "icon.ico"
+$IconPath = Join-Path $ScriptsPath "icon.ico"
 
-# Tworzenie skrótu na Pulpicie
+# Tworzenie skrótu na Pulpicie (wskazującym na folder Scripts jako roboczy)
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
 $Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Shortcut.Arguments = "-WindowStyle Hidden -Command ""& {Set-Location '$ProjectPath'; Start-Process python -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
-$Shortcut.WorkingDirectory = $ProjectPath
+$Shortcut.Arguments = "-WindowStyle Hidden -Command ""& {Set-Location '$ScriptsPath'; Start-Process python -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
+$Shortcut.WorkingDirectory = $ScriptsPath
 $Shortcut.Description = "Jarvis App Dashboard"
 
 if (Test-Path $IconPath) {
