@@ -12,7 +12,7 @@ $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
 # Ścieżka do PowerShell, parametry (ukryte okno, zmiana katalogu i uruchomienie skryptu Pythona)
 $Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Shortcut.Arguments = "-WindowStyle Hidden -Command `"& {{Set-Location '$ProjectPath'; Start-Process python -ArgumentList 'jarvis.py' -WindowStyle Hidden}}`""
+$Shortcut.Arguments = "-WindowStyle Hidden -Command ""& {Set-Location '$ProjectPath'; Start-Process python -ArgumentList 'jarvis.py' -WindowStyle Hidden}"""
 $Shortcut.WorkingDirectory = $ProjectPath
 $Shortcut.Description = "Jarvis App Dashboard"
 
@@ -24,4 +24,4 @@ if (Test-Path $IconPath) {
 }
 
 $Shortcut.Save()
-Write-Host "Gotowe! Skrót 'Jarvis App' został pomyślnie utworzony na Pulpicie." -ForegroundColor Green
+Write-Host "Gotowe! Skrót 'Jarvis App' został pomyślnie utworzony na Pulpicie." -ForegroundColor Greengit add .
