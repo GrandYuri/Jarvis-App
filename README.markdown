@@ -22,8 +22,6 @@ Welcome to **Jarvis App**! This lightweight background dashboard automates your 
 
 ### 📁 Structure
 
-text
-
 Jarvis-App/
 ├── setup.bat             # Main launcher / installer
 ├── requirements.txt      # Automated Python packages list
@@ -35,5 +33,3 @@ Jarvis-App/
     ├── icon.ico          # App desktop icon
     ├── .gitignore        # Git ignore rules
     └── *.json            # Configuration and local data files
-
-Use code with caution.
