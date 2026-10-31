@@ -7,34 +7,44 @@ Write-Host "          JARVIS APP CONFIG              " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Pobranie klucza API od użytkownika
-$rawKey = Read-Host "--Here you can paste your openai api key"
-$apiKey = $rawKey.Trim()
+$keySaved = $false
 
-if ([string]::IsNullOrWhiteSpace($apiKey)) {
-    Write-Host "[ERROR] Key can't be empty! Please open setup.exe again to enter your API key." -ForegroundColor Red
-    Pause
-    exit
+# Pętla sprawdzania i wprowadzania klucza API
+while ($true) {
+    $rawKey = Read-Host "--Here you can paste your openai api key"
+    $apiKey = $rawKey.Trim()
+
+    # Sprawdzenie warunków poprawności klucza (niepusty i zaczynający się od sk-)
+    if (-not [string]::IsNullOrWhiteSpace($apiKey) -and $apiKey.StartsWith("sk-")) {
+        [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $apiKey, "User")
+        Write-Host "[OK] OpenAI Key is now saved!" -ForegroundColor Green
+        $keySaved = $true
+        break
+    } else {
+        Write-Host "[ERROR] Invalid API key format! The key must start with 'sk-' and cannot be empty." -ForegroundColor Red
+        
+        # Pętla z pytaniem y/n
+        $retryChoice = ""
+        while ($retryChoice -ne "y" -and $retryChoice -ne "n") {
+            $retryChoice = (Read-Host "Do you want to try entering the key again? (y/n)").Trim().ToLower()
+        }
+
+        if ($retryChoice -eq "n") {
+            Write-Host "[INFO] Skipping API key setup. Continuing shortcut creation..." -ForegroundColor Yellow
+            break
+        }
+        
+        Write-Host ""
+    }
 }
 
-if (-not $apiKey.StartsWith("sk-")) {
-    Write-Host "[ERROR] Invalid API key format! The key must start with 'sk-'." -ForegroundColor Red
-    Write-Host "Please open setup.exe again to enter your API key." -ForegroundColor Yellow
-    Pause
-    exit
-}
-
-# Zapisanie klucza w zmiennych środowiskowych użytkownika na stałe
-[Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $apiKey, "User")
-Write-Host "[OK] OpenAI Key is now saved!" -ForegroundColor Green
-
-# Dynamiczne pobranie ścieżki folderu, w którym znajdują się pobrane pliki projektu
+# Dynamiczne pobranie ścieżki folderu projektu
 $ProjectPath = $PSScriptRoot
 $DesktopPath = [Environment]::GetFolderPath("Desktop")
 $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
 $IconPath = Join-Path $ProjectPath "icon.ico"
 
-# Tworzenie skrótu na Pulpicie wskazującego na pobrany katalog
+# Tworzenie skrótu na Pulpicie
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
