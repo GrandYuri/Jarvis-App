@@ -85,16 +85,14 @@ $DesktopPath = [Environment]::GetFolderPath("Desktop")
 $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
 $IconPath = Join-Path $ScriptsPath "icon.ico"
 $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-
-# Definiujemy pełną ścieżkę absolutną do pliku jarvis.py
 $JarvisScript = Join-Path $ScriptsPath "jarvis.py"
 
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
-$Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-# Przekazujemy pełną ścieżkę do Pythona oraz pełną ścieżkę do skryptu jarvis.py
-$Shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""& {Start-Process '$VenvPython' -ArgumentList '`"$JarvisScript`"' -WindowStyle Hidden}"""
+# Uruchamiamy bezpośrednio Pythona ze środowiska wirtualnego, omijając okno PowerShella
+$Shortcut.TargetPath = $VenvPython
+$Shortcut.Arguments = "`"$JarvisScript`""
 $Shortcut.WorkingDirectory = $ScriptsPath
 $Shortcut.Description = "Jarvis App Dashboard"
 
@@ -103,6 +101,7 @@ if (Test-Path $IconPath) {
 }
 
 $Shortcut.Save()
+Write-Host "[OK] Shortcut 'Jarvis App' was created on Desktop!" -ForegroundColor Green
 Write-Host "[OK] Shortcut 'Jarvis App' was created on Desktop!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Everything ready! Powershell closes in 3 seconds..." -ForegroundColor Yellow
