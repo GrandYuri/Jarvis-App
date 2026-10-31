@@ -14,8 +14,8 @@ Welcome to **Jarvis App**! This lightweight background dashboard automates your 
 
 ## 🚀 Quick Installation
 
-1. Download or clone this repository to your preferred location.
-2. Run the `setup.bat` file by double-clicking it.
+1. Download this repository to your preferred location.
+2. Run `setup.bat` file.
 3. When prompted in the console, paste your **OpenAI API Key** and press `Enter`.
    * *If the key format is invalid or empty, you will be prompted to retry (`y`) or skip (`n`).*
 4. Once configured, a shortcut named **Jarvis App** will automatically be created on your Desktop.
@@ -35,4 +35,5 @@ Jarvis-App/
     ├── jarvis.py         # Basically everything
     ├── jarvis_ai.py      # AI logic
     ├── icon.ico          # App icon
+    ├── .gitignore        # Just ignore it
     └── *.json            # Config and data
