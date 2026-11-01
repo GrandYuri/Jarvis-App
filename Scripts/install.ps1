@@ -75,7 +75,7 @@ if (Test-Path $RequirementsPath) {
     Write-Warning "[WARN] requirements.txt not found!"
 }
 
-# 3. SEKCJA TWORZENIA SKRÓTU
+# 3. SEKCJA TWORZENIA SKRÓTU (Odporna na konflikt ZIP vs Folder)
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "          CREATING DESKTOP SHORTCUT      " -ForegroundColor Cyan
@@ -84,15 +84,22 @@ Write-Host "=========================================" -ForegroundColor Cyan
 $DesktopPath = [Environment]::GetFolderPath("Desktop")
 $ShortcutPath = Join-Path $DesktopPath "Jarvis App.lnk"
 $IconPath = Join-Path $ScriptsPath "icon.ico"
-$VenvPython = Join-Path $VenvPath "Scripts\python.exe"
+
+# 🔥 WYMUSZENIE ŚCIEŻKI ABSOLUTNEJ DO WYODRĘBNIONEGO FOLDERU (Bez .zip)
+# Przekształcamy ścieżki na pełne ścieżki systemu plików (FileSystem), co odcina wirtualne ścieżki ZIP Windowsa
+$FixedScriptsPath = (Get-Item $ScriptsPath).FullName
+$FixedVenvPath = (Get-Item $VenvPath).FullName
+
+$AbsoluteVenvPython = Join-Path $FixedVenvPath "Scripts\python.exe"
+$AbsoluteJarvisScript = Join-Path $FixedScriptsPath "jarvis.py"
 
 $WscriptShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WscriptShell.CreateShortcut($ShortcutPath)
 
-# Skrót odpala bezpośrednio Pythona z wygenerowanego folderu .venv użytkownika
-$Shortcut.TargetPath = $VenvPython
-$Shortcut.Arguments = "`"$JarvisScript`""
-$Shortcut.WorkingDirectory = $ScriptsPath
+# Skrót uruchamia PowerShell i przekazuje mu czyste, fizyczne ścieżki z dysku twardego
+$Shortcut.TargetPath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+$Shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command ""& {Set-Location '$FixedScriptsPath'; & '$AbsoluteVenvPython' '$AbsoluteJarvisScript'}"""
+$Shortcut.WorkingDirectory = $FixedScriptsPath
 $Shortcut.Description = "Jarvis App Dashboard"
 
 if (Test-Path $IconPath) {
